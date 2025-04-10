@@ -821,9 +821,7 @@ export default function MenuPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <Badge variant="outline" className="px-2 py-1 text-xs sm:text-sm">
-                            {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                              categories.find((cat) => cat.slug === item.category)?.name.en ||
-                              item.category}
+                            {item.category}
                           </Badge>
                           <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
                         </div>
@@ -859,9 +857,7 @@ export default function MenuPage() {
                             <div>
                               <CardTitle className="text-lg sm:text-xl">{item.name[displayLanguage] || item.name.en}</CardTitle>
                               <Badge variant="outline" className="mt-2 text-xs sm:text-sm">
-                                {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                                  categories.find((cat) => cat.slug === item.category)?.name.en ||
-                                  item.category}
+                                {item.category}
                               </Badge>
                             </div>
                             <div className="flex space-x-1 sm:space-x-2">
@@ -917,9 +913,7 @@ export default function MenuPage() {
                         </div>
                         <div className="text-xs sm:text-sm font-medium">{item.name[displayLanguage] || item.name.en}</div>
                         <div className="text-xs sm:text-sm">
-                          {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                            categories.find((cat) => cat.slug === item.category)?.name.en ||
-                            item.category}
+                          {item.category}
                         </div>
                         <div className="hidden sm:block text-xs sm:text-sm text-muted-foreground">
                           {item.description[displayLanguage] || item.description.en}
@@ -1054,12 +1048,12 @@ export default function MenuPage() {
             </div>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {categories.length === 0 ? (
                   <p className="text-center text-muted-foreground">No categories yet. Add your first category!</p>
                 ) : (
                   <div className="rounded-md border">
-                    <div className="grid grid-cols-4 gap-4 p-4 font-medium">
+                    <div className="hidden sm:grid grid-cols-4 gap-4 p-4 font-medium">
                       <div>Name</div>
                       <div>Slug</div>
                       <div>Items</div>
@@ -1070,25 +1064,42 @@ export default function MenuPage() {
                         const itemCount = menuItems.filter((item) => item.category === category.slug).length
 
                         return (
-                          <div key={category.id} className="grid grid-cols-4 gap-4 p-4">
-                            <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
-                            <div className="text-muted-foreground">{category.slug}</div>
-                            <div>{itemCount} items</div>
-                            <div className="flex space-x-2">
-                              <Button variant="ghost" size="sm" onClick={() => openCategoryEditDialog(category)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-500 hover:text-red-600"
-                                onClick={() => openCategoryDeleteDialog(category)}
-                                disabled={itemCount > 0}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </Button>
+                          <div key={category.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Name</div>
+                              <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Slug</div>
+                              <div className="text-muted-foreground break-all">{category.slug}</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Items</div>
+                              <div>{itemCount} items</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Actions</div>
+                              <div className="flex flex-wrap gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => openCategoryEditDialog(category)}
+                                  className="w-full sm:w-auto"
+                                >
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full sm:w-auto text-red-500 hover:text-red-600"
+                                  onClick={() => openCategoryDeleteDialog(category)}
+                                  disabled={itemCount > 0}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         )

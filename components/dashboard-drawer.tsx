@@ -63,16 +63,16 @@ export default function DashboardDrawer() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="h-9 w-9">
+        <Button variant="outline" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">
           <Menu className="h-4 w-4" />
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-72 p-0">
+      <SheetContent side="left" className="w-[280px] sm:w-72 p-0">
         <div className="flex h-screen flex-col">
-          <div className="flex h-14 items-center border-b px-4">
-            <Link href="/" className="flex items-center font-semibold" onClick={() => setOpen(false)}>
-              <UtensilsCrossed className="mr-2 h-5 w-5" />
+          <div className="flex h-12 sm:h-14 items-center border-b px-3 sm:px-4">
+            <Link href="/" className="flex items-center font-semibold text-sm sm:text-base" onClick={() => setOpen(false)}>
+              <UtensilsCrossed className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Food Order Admin
             </Link>
           </div>
@@ -84,7 +84,7 @@ export default function DashboardDrawer() {
                   asChild
                   variant={pathname === item.href ? "secondary" : "ghost"}
                   className={cn(
-                    "justify-start w-full",
+                    "justify-start w-full h-10 sm:h-11 text-sm sm:text-base",
                     pathname === item.href ? "bg-secondary" : "hover:bg-muted"
                   )}
                   onClick={() => setOpen(false)}
@@ -97,8 +97,12 @@ export default function DashboardDrawer() {
               ))}
             </nav>
           </div>
-          <div className="border-t p-4">
-            <Button variant="outline" className="w-full justify-start" onClick={handleSignOut}>
+          <div className="border-t p-3 sm:p-4">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-10 sm:h-11 text-sm sm:text-base" 
+              onClick={handleSignOut}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
