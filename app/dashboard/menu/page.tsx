@@ -36,7 +36,7 @@ import { initializeApp } from "firebase/app"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore"
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import DashboardNav from "@/components/dashboard-nav"
+import DashboardDrawer from "@/components/dashboard-drawer"
 import { Pencil, Trash2, Plus, Globe, Grid, List, Table } from "lucide-react"
 
 // Your Firebase configuration
@@ -533,11 +533,14 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <DashboardNav />
-      <div className="flex-1 p-4 sm:p-6 md:p-8">
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="min-h-screen">
+      <div className="p-4 md:p-8 ml-0">
+        <div className="flex items-center gap-4 mb-4 sm:mb-6">
+          <DashboardDrawer />
           <h1 className="text-2xl sm:text-3xl font-bold">Menu Management</h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Label htmlFor="display-language" className="text-sm sm:text-base">

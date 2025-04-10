@@ -20,7 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { initializeApp } from "firebase/app"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { getFirestore, collection, getDocs, doc, updateDoc, query, where, orderBy } from "firebase/firestore"
-import DashboardNav from "@/components/dashboard-nav"
+import DashboardDrawer from "@/components/dashboard-drawer"
 import { Eye } from "lucide-react"
 
 // Your Firebase configuration
@@ -89,11 +89,12 @@ export default function OrdersPage() {
       let ordersQuery = collection(db, "orders")
 
       // Filter by status if not "all"
+      let finalQuery = query(ordersQuery, orderBy("createdAt", "desc"))
       if (activeTab !== "all") {
-        ordersQuery = query(collection(db, "orders"), where("status", "==", activeTab), orderBy("createdAt", "desc"))
+        finalQuery = query(ordersQuery, where("status", "==", activeTab), orderBy("createdAt", "desc"))
       }
 
-      const querySnapshot = await getDocs(ordersQuery)
+      const querySnapshot = await getDocs(finalQuery)
       const fetchedOrders: Order[] = []
 
       querySnapshot.forEach((doc) => {
@@ -183,10 +184,12 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <DashboardNav />
-      <div className="flex-1 p-8">
-        <h1 className="mb-6 text-3xl font-bold">Order Management</h1>
+    <div className="min-h-screen">
+      <div className="p-4 md:p-8 ml-0">
+        <div className="flex items-center gap-4 mb-6">
+          <DashboardDrawer />
+          <h1 className="text-3xl font-bold">Order Management</h1>
+        </div>
 
         {error && (
           <Alert variant="destructive" className="mb-6">

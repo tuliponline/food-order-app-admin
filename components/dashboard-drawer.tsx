@@ -63,7 +63,7 @@ export default function DashboardDrawer() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="fixed left-4 top-4 z-50">
+        <Button variant="outline" size="icon" className="h-9 w-9">
           <Menu className="h-4 w-4" />
           <span className="sr-only">Toggle menu</span>
         </Button>

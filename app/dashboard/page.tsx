@@ -81,9 +81,11 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <DashboardDrawer />
       <div className="p-4 md:p-8 ml-0">
-        <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
+        <div className="flex items-center gap-4 mb-6">
+          <DashboardDrawer />
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+        </div>
 
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card>
