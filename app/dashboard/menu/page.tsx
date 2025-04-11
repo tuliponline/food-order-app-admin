@@ -79,9 +79,9 @@ type Category = {
 
 // Available languages
 const languages = [
-  { code: "en", name: "English" },
-  { code: "lo", name: "Lao" },
-  { code: "th", name: "Thai" },
+  { code: "en", name: "อังกฤษ" },
+  { code: "lo", name: "ลาว" },
+  { code: "th", name: "ไทย" },
 ]
 
 // Helper function to resize image
@@ -197,8 +197,8 @@ export default function MenuPage() {
     try {
       await Promise.all([fetchMenuItems(), fetchCategories()])
     } catch (err) {
-      console.error("Error fetching data:", err)
-      setError("Failed to load data. Please try again later.")
+      console.error("ผิดพลาดการดึงข้อมูล:", err)
+      setError("การดึงข้อมูลล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setLoading(false)
     }
@@ -206,7 +206,7 @@ export default function MenuPage() {
 
   const fetchMenuItems = async () => {
     try {
-      console.log("Fetching menu items from Firestore...")
+      console.log("ดึงข้อมูลเมนู...")
       const querySnapshot = await getDocs(collection(db, "menuItems"))
       const items: MenuItem[] = []
 
@@ -234,14 +234,14 @@ export default function MenuPage() {
       setMenuItems(items)
       return items
     } catch (err) {
-      console.error("Error fetching menu items:", err)
+      console.error("ผิดพลาดการดึงข้อมูลเมนู:", err)
       throw err
     }
   }
 
   const fetchCategories = async () => {
     try {
-      console.log("Fetching categories from Firestore...")
+      console.log("ดึงข้อมูลหมวดหมู่...")
       const querySnapshot = await getDocs(collection(db, "categories"))
       const fetchedCategories: Category[] = []
 
@@ -258,11 +258,11 @@ export default function MenuPage() {
         })
       })
 
-      console.log(`Fetched ${fetchedCategories.length} categories`)
+      console.log(`ดึงข้อมูล ${fetchedCategories.length} หมวดหมู่`)
       setCategories(fetchedCategories)
       return fetchedCategories
     } catch (err) {
-      console.error("Error fetching categories:", err)
+      console.error("ผิดพลาดการดึงข้อมูลหมวดหมู่:", err)
       throw err
     }
   }
@@ -276,26 +276,26 @@ export default function MenuPage() {
     try {
       // Validate inputs
       if (!newItem.name.en || !newItem.description.en || !newItem.price || !newItem.category) {
-        setFormError("Please fill in all required fields (at least in English)")
+        setFormError("กรุณากรอกข้อมูลทั้งหมด (อย่างน้อยหนึ่งภาษาเป็นอังกฤษ)")
         setIsSubmitting(false)
         return
       }
 
-      console.log("Adding new menu item:", newItem)
+      console.log("เพิ่มเมนูใหม่:", newItem)
       let imageUrl = ""
 
       // Upload image if provided
       if (newItem.image) {
-        console.log("Resizing and uploading image to Firebase Storage...")
+        console.log("ปรับขนาดและอัพโหลดรูปภาพไปยัง Firebase Storage...")
         const resizedImage = await resizeImage(newItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${newItem.image.name}`)
         const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
-        console.log("Image uploaded successfully:", imageUrl)
+        console.log("รูปภาพอัพโหลดสำเร็จ:", imageUrl)
       }
 
       // Add document to Firestore
-      console.log("Adding document to Firestore...")
+      console.log("เพิ่มเอกสารไปยัง Firestore...")
       const docRef = await addDoc(collection(db, "menuItems"), {
         name: newItem.name,
         description: newItem.description,
@@ -304,7 +304,7 @@ export default function MenuPage() {
         imageUrl: imageUrl,
       })
 
-      console.log("Document added with ID:", docRef.id)
+      console.log("เพิ่มเอกสารด้วย ID:", docRef.id)
 
       // Reset form and close dialog
       setNewItem({
@@ -319,8 +319,8 @@ export default function MenuPage() {
       // Refresh menu items
       fetchMenuItems()
     } catch (err) {
-      console.error("Error adding menu item:", err)
-      setFormError("Failed to add menu item. Please try again.")
+      console.error("ผิดพลาดในการเพิ่มเมนู:", err)
+      setFormError("การเพิ่มเมนูล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setIsSubmitting(false)
     }
@@ -336,26 +336,26 @@ export default function MenuPage() {
     try {
       // Validate inputs
       if (!editItem.name.en || !editItem.description.en || !editItem.price || !editItem.category) {
-        setFormError("Please fill in all required fields (at least in English)")
+        setFormError("กรุณากรอกข้อมูลทั้งหมด (อย่างน้อยหนึ่งภาษาเป็นอังกฤษ)")
         setIsSubmitting(false)
         return
       }
 
-      console.log("Updating menu item:", editItem)
+      console.log("อัพเดตเมนู:", editItem)
       let imageUrl = editItem.imageUrl
 
       // Upload new image if provided
       if (editItem.image) {
-        console.log("Resizing and uploading new image to Firebase Storage...")
+        console.log("ปรับขนาดและอัพโหลดรูปภาพใหม่ไปยัง Firebase Storage...")
         const resizedImage = await resizeImage(editItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${editItem.image.name}`)
         const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
-        console.log("Image uploaded successfully:", imageUrl)
+        console.log("รูปภาพอัพโหลดสำเร็จ:", imageUrl)
       }
 
       // Update document in Firestore
-      console.log("Updating document in Firestore...")
+      console.log("อัพเดตเอกสาร...")
       await updateDoc(doc(db, "menuItems", editItem.id), {
         name: editItem.name,
         description: editItem.description,
@@ -364,7 +364,7 @@ export default function MenuPage() {
         imageUrl: imageUrl,
       })
 
-      console.log("Document updated successfully")
+      console.log("เอกสารอัพเดตสำเร็จ")
 
       // Reset form and close dialog
       setEditItem(null)
@@ -373,8 +373,8 @@ export default function MenuPage() {
       // Refresh menu items
       fetchMenuItems()
     } catch (err) {
-      console.error("Error updating menu item:", err)
-      setFormError("Failed to update menu item. Please try again.")
+      console.error("ผิดพลาดในการอัพเดตเมนู:", err)
+      setFormError("การอัพเดตเมนูล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setIsSubmitting(false)
     }
@@ -385,17 +385,17 @@ export default function MenuPage() {
 
     setIsSubmitting(true)
     try {
-      console.log("Deleting menu item:", itemToDelete)
+      console.log("ลบเมนู:", itemToDelete)
       await deleteDoc(doc(db, "menuItems", itemToDelete))
-      console.log("Document deleted successfully")
+      console.log("เอกสารลบสำเร็จ")
 
       // Close dialog and refresh menu items
       setItemToDelete(null)
       setIsDeleteDialogOpen(false)
       fetchMenuItems()
     } catch (err) {
-      console.error("Error deleting menu item:", err)
-      setError("Failed to delete menu item. Please try again.")
+      console.error("ผิดพลาดในการลบเมนู:", err)
+      setError("การลบเมนูล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setIsSubmitting(false)
     }
@@ -428,7 +428,7 @@ export default function MenuPage() {
     try {
       // Validate inputs
       if (!newCategory.name.en || !newCategory.slug) {
-        setFormError("Please fill in all required fields (at least in English)")
+        setFormError("กรุณากรอกข้อมูลทั้งหมด (อย่างน้อยหนึ่งภาษาเป็นอังกฤษ)")
         setIsSubmitting(false)
         return
       }
@@ -441,7 +441,7 @@ export default function MenuPage() {
         return
       }
 
-      console.log("Adding new category:", newCategory)
+      console.log("เพิ่มหมวดหมู่ใหม่:", newCategory)
 
       // Add document to Firestore
       const docRef = await addDoc(collection(db, "categories"), {
@@ -449,7 +449,7 @@ export default function MenuPage() {
         slug: newCategory.slug,
       })
 
-      console.log("Category added with ID:", docRef.id)
+      console.log("เพิ่มหมวดหมู่ด้วย ID:", docRef.id)
 
       // Reset form and close dialog
       setNewCategory({
@@ -461,8 +461,8 @@ export default function MenuPage() {
       // Refresh categories
       fetchCategories()
     } catch (err) {
-      console.error("Error adding category:", err)
-      setFormError("Failed to add category. Please try again.")
+      console.error("ผิดพลาดในการเพิ่มหมวดหมู่:", err)
+      setFormError("การเพิ่มหมวดหมู่ล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setIsSubmitting(false)
     }
@@ -478,7 +478,7 @@ export default function MenuPage() {
     try {
       // Validate inputs
       if (!editCategory.name.en || !editCategory.slug) {
-        setFormError("Please fill in all required fields (at least in English)")
+        setFormError("กรุณากรอกข้อมูลทั้งหมด (อย่างน้อยหนึ่งภาษาเป็นอังกฤษ)")
         setIsSubmitting(false)
         return
       }
@@ -529,7 +529,7 @@ export default function MenuPage() {
 
       if (itemsWithCategory.length > 0) {
         setError(
-          `Cannot delete category "${categoryToDelete.name[displayLanguage]}" because it is used by ${itemsWithCategory.length} menu items.`,
+          `ไม่สามารถลบหมวดหมู่ "${categoryToDelete.name[displayLanguage]}" เพราะมี ${itemsWithCategory.length} เมนูอาหารใช้งาน`,
         )
         setIsCategoryDeleteDialogOpen(false)
         setCategoryToDelete(null)
@@ -538,15 +538,15 @@ export default function MenuPage() {
       }
 
       await deleteDoc(doc(db, "categories", categoryToDelete.id))
-      console.log("Category deleted successfully")
+      console.log("ลบหมวดหมู่สำเร็จ")
 
       // Close dialog and refresh categories
       setCategoryToDelete(null)
       setIsCategoryDeleteDialogOpen(false)
       fetchCategories()
     } catch (err) {
-      console.error("Error deleting category:", err)
-      setError("Failed to delete category. Please try again.")
+      console.error("ผิดพลาดในการลบหมวดหมู่:", err)
+      setError("การลบหมวดหมู่ล้มเหลว กรุณาลองใหม่อีกครั้ง")
     } finally {
       setIsSubmitting(false)
     }
@@ -583,18 +583,18 @@ export default function MenuPage() {
       <div className="p-4 md:p-8 ml-0">
         <div className="flex items-center gap-4 mb-4 sm:mb-6">
           <DashboardDrawer />
-          <h1 className="text-2xl sm:text-3xl font-bold">Menu Management</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">จัดการเมนู</h1>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Label htmlFor="display-language" className="text-sm sm:text-base">
-                Display Language:
+                  ภาษาที่แสดง:
               </Label>
               <Select value={displayLanguage} onValueChange={(value: "en" | "lo" | "th") => setDisplayLanguage(value)}>
                 <SelectTrigger id="display-language" className="w-[140px] sm:w-[180px]">
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder="เลือกภาษา" />
                 </SelectTrigger>
                 <SelectContent>
                   {languages.map((lang) => (
@@ -645,26 +645,26 @@ export default function MenuPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full sm:w-auto">
-            <TabsTrigger value="items" className="flex-1 sm:flex-none">Menu Items</TabsTrigger>
-            <TabsTrigger value="categories" className="flex-1 sm:flex-none">Categories</TabsTrigger>
+            <TabsTrigger value="items" className="flex-1 sm:flex-none">เมนู</TabsTrigger>
+            <TabsTrigger value="categories" className="flex-1 sm:flex-none">หมวดหมู่</TabsTrigger>
           </TabsList>
 
           <TabsContent value="items">
             <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-lg sm:text-xl font-semibold">Menu Items</h2>
+              <h2 className="text-lg sm:text-xl font-semibold">เมนู</h2>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add New Item
+                    เพิ่มรายการใหม่
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px]">
                   <form onSubmit={handleAddItem}>
                     <DialogHeader>
-                      <DialogTitle>Add New Menu Item</DialogTitle>
+                      <DialogTitle>เพิ่มรายการอาหารใหม่</DialogTitle>
                       <DialogDescription>
-                        Fill in the details for the new food item in multiple languages.
+                        กรอกรายละเอียดสำหรับรายการอาหารใหม่ในหลายภาษา
                       </DialogDescription>
                     </DialogHeader>
                     {formError && (
@@ -675,13 +675,13 @@ export default function MenuPage() {
                     <div className="grid gap-4 py-4">
                       <Tabs defaultValue="en" className="w-full">
                         <TabsList className="mb-4">
-                          <TabsTrigger value="en">English</TabsTrigger>
+                            <TabsTrigger value="en"></TabsTrigger>
                           <TabsTrigger value="lo">Lao</TabsTrigger>
                           <TabsTrigger value="th">Thai</TabsTrigger>
                         </TabsList>
                         <TabsContent value="en">
                           <div className="grid gap-2">
-                            <Label htmlFor="name-en">Name (English) *</Label>
+                            <Label htmlFor="name-en">ชื่อ (อังกฤษ) *</Label>
                             <Input
                               id="name-en"
                               value={newItem.name.en}
@@ -695,7 +695,7 @@ export default function MenuPage() {
                             />
                           </div>
                           <div className="grid gap-2 mt-4">
-                            <Label htmlFor="description-en">Description (English) *</Label>
+                            <Label htmlFor="description-en">คำอธิบาย (อังกฤษ) *</Label>
                             <Textarea
                               id="description-en"
                               value={newItem.description.en}
@@ -711,7 +711,7 @@ export default function MenuPage() {
                         </TabsContent>
                         <TabsContent value="lo">
                           <div className="grid gap-2">
-                            <Label htmlFor="name-lo">Name (Lao)</Label>
+                            <Label htmlFor="name-lo">ชื่อ (ลาว)</Label>
                             <Input
                               id="name-lo"
                               value={newItem.name.lo}
@@ -724,7 +724,7 @@ export default function MenuPage() {
                             />
                           </div>
                           <div className="grid gap-2 mt-4">
-                            <Label htmlFor="description-lo">Description (Lao)</Label>
+                            <Label htmlFor="description-lo">คำอธิบาย (ลาว)</Label>
                             <Textarea
                               id="description-lo"
                               value={newItem.description.lo}
@@ -739,7 +739,7 @@ export default function MenuPage() {
                         </TabsContent>
                         <TabsContent value="th">
                           <div className="grid gap-2">
-                            <Label htmlFor="name-th">Name (Thai)</Label>
+                            <Label htmlFor="name-th">ชื่อ (ไทย)</Label>
                             <Input
                               id="name-th"
                               value={newItem.name.th}
@@ -752,7 +752,7 @@ export default function MenuPage() {
                             />
                           </div>
                           <div className="grid gap-2 mt-4">
-                            <Label htmlFor="description-th">Description (Thai)</Label>
+                            <Label htmlFor="description-th">คำอธิบาย (ไทย)</Label>
                             <Textarea
                               id="description-th"
                               value={newItem.description.th}
@@ -769,7 +769,7 @@ export default function MenuPage() {
 
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="price">Price ($) *</Label>
+                          <Label htmlFor="price">ราคา ($) *</Label>
                           <Input
                             id="price"
                             type="number"
@@ -781,14 +781,14 @@ export default function MenuPage() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label htmlFor="category">Category *</Label>
+                          <Label htmlFor="category">หมวดหมู่ *</Label>
                           <Select
                             value={newItem.category}
                             onValueChange={(value) => setNewItem({ ...newItem, category: value })}
                             required
                           >
                             <SelectTrigger id="category">
-                              <SelectValue placeholder="Select category" />
+                              <SelectValue placeholder="เลือกหมวดหมู่" />
                             </SelectTrigger>
                             <SelectContent>
                               {categories.length === 0 ? (
@@ -807,7 +807,7 @@ export default function MenuPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
-                        <Label htmlFor="image">Image</Label>
+                        <Label htmlFor="image">รูปภาพ</Label>
                         <Input
                           id="image"
                           type="file"
@@ -821,10 +821,10 @@ export default function MenuPage() {
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                        Cancel
+                        ยกเลิก
                       </Button>
                       <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Adding..." : "Add Item"}
+                        {isSubmitting ? "กำลังเพิ่ม..." : "เพิ่มรายการ"}
                       </Button>
                     </DialogFooter>
                   </form>
@@ -937,16 +937,16 @@ export default function MenuPage() {
             {viewMode === "table" && (
               <div className="rounded-md border overflow-x-auto">
                 <div className="grid grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4 font-medium text-xs sm:text-sm">
-                  <div className="w-16 sm:w-24">Image</div>
-                  <div>Name</div>
-                  <div>Category</div>
-                  <div className="hidden sm:block">Description</div>
-                  <div>Price</div>
-                  <div>Actions</div>
+                  <div className="w-16 sm:w-24">รูปภาพ</div>
+                  <div>ชื่อ</div>
+                  <div>หมวดหมู่</div>
+                  <div className="hidden sm:block">คำอธิบาย</div>
+                  <div>ราคา</div>
+                  <div>การกระทำ</div>
                 </div>
                 <div className="divide-y">
                   {menuItems.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">No menu items yet. Add your first item!</div>
+                    <div className="p-4 text-center text-muted-foreground">ไม่มีรายการเมนูอะไรเลย เพิ่มรายการเมนูของคุณก่อน!</div>
                   ) : (
                     menuItems.map((item) => (
                       <div key={item.id} className="grid grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4">
@@ -968,7 +968,7 @@ export default function MenuPage() {
                         <div className="flex items-center space-x-1 sm:space-x-2">
                           <Button variant="ghost" size="sm" onClick={() => openEditDialog(item)} className="h-7 sm:h-9">
                             <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span className="hidden sm:inline ml-2">Edit</span>
+                            <span className="hidden sm:inline ml-2">แก้ไข</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -977,7 +977,7 @@ export default function MenuPage() {
                             onClick={() => openDeleteDialog(item.id)}
                           >
                             <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span className="hidden sm:inline ml-2">Delete</span>
+                            <span className="hidden sm:inline ml-2">ลบ</span>
                           </Button>
                         </div>
                       </div>
@@ -990,19 +990,19 @@ export default function MenuPage() {
 
           <TabsContent value="categories">
             <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-lg sm:text-xl font-semibold">Categories</h2>
+              <h2 className="text-lg sm:text-xl font-semibold">หมวดหมู่</h2>
               <Dialog open={isCategoryAddDialogOpen} onOpenChange={setIsCategoryAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add New Category
+                    เพิ่มหมวดหมู่ใหม่
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[600px]">
                   <form onSubmit={handleAddCategory}>
                     <DialogHeader>
-                      <DialogTitle>Add New Category</DialogTitle>
-                      <DialogDescription>Create a new category for menu items in multiple languages.</DialogDescription>
+                      <DialogTitle>เพิ่มหมวดหมู่ใหม่</DialogTitle>
+                      <DialogDescription>สร้างหมวดหมู่ใหม่สำหรับรายการเมนูในหลายภาษา</DialogDescription>
                     </DialogHeader>
                     {formError && (
                       <Alert variant="destructive" className="my-4">
@@ -1012,13 +1012,13 @@ export default function MenuPage() {
                     <div className="grid gap-4 py-4">
                       <Tabs defaultValue="en" className="w-full">
                         <TabsList className="mb-4">
-                          <TabsTrigger value="en">English</TabsTrigger>
-                          <TabsTrigger value="lo">Lao</TabsTrigger>
-                          <TabsTrigger value="th">Thai</TabsTrigger>
+                          <TabsTrigger value="en">อังกฤษ</TabsTrigger>
+                          <TabsTrigger value="lo">ลาว</TabsTrigger>
+                          <TabsTrigger value="th">ไทย</TabsTrigger>
                         </TabsList>
                         <TabsContent value="en">
                           <div className="grid gap-2">
-                            <Label htmlFor="category-name-en">Name (English) *</Label>
+                            <Label htmlFor="category-name-en">ชื่อ (อังกฤษ) *</Label>
                             <Input
                               id="category-name-en"
                               value={newCategory.name.en}
@@ -1036,7 +1036,7 @@ export default function MenuPage() {
                         </TabsContent>
                         <TabsContent value="lo">
                           <div className="grid gap-2">
-                            <Label htmlFor="category-name-lo">Name (Lao)</Label>
+                            <Label htmlFor="category-name-lo">ชื่อ (ลาว)</Label>
                             <Input
                               id="category-name-lo"
                               value={newCategory.name.lo}
@@ -1051,7 +1051,7 @@ export default function MenuPage() {
                         </TabsContent>
                         <TabsContent value="th">
                           <div className="grid gap-2">
-                            <Label htmlFor="category-name-th">Name (Thai)</Label>
+                            <Label htmlFor="category-name-th">ชื่อ (ไทย)</Label>
                             <Input
                               id="category-name-th"
                               value={newCategory.name.th}
@@ -1067,7 +1067,7 @@ export default function MenuPage() {
                       </Tabs>
 
                       <div className="grid gap-2 mt-4">
-                        <Label htmlFor="category-slug">Slug *</Label>
+                        <Label htmlFor="category-slug">รหัสสำหรับหมวดหมู่ *</Label>
                         <Input
                           id="category-slug"
                           value={newCategory.slug}
@@ -1075,17 +1075,16 @@ export default function MenuPage() {
                           required
                         />
                         <p className="text-xs text-muted-foreground">
-                          The slug is used as a unique identifier for the category. Use only lowercase letters, numbers,
-                          and hyphens.
+                          รหัสสำหรับหมวดหมู่ใช้เป็นตัวระบุที่เฉพาะเจาะจงสำหรับหมวดหมู่ ใช้เฉพาะตัวพิมพ์เล็ก ตัวเลข และเครื่องหมายลบ
                         </p>
                       </div>
                     </div>
                     <DialogFooter>
                       <Button type="button" variant="outline" onClick={() => setIsCategoryAddDialogOpen(false)}>
-                        Cancel
+                        ยกเลิก
                       </Button>
                       <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? "Adding..." : "Add Category"}
+                        {isSubmitting ? "กำลังเพิ่ม..." : "เพิ่มหมวดหมู่"}
                       </Button>
                     </DialogFooter>
                   </form>
@@ -1096,14 +1095,14 @@ export default function MenuPage() {
             <Card>
               <CardContent className="p-4 sm:p-6">
                 {categories.length === 0 ? (
-                  <p className="text-center text-muted-foreground">No categories yet. Add your first category!</p>
+                  <p className="text-center text-muted-foreground">ไม่มีหมวดหมู่อะไรเลย เพิ่มหมวดหมู่ของคุณก่อน!</p>
                 ) : (
                   <div className="rounded-md border">
                     <div className="hidden sm:grid grid-cols-4 gap-4 p-4 font-medium">
-                      <div>Name</div>
-                      <div>Slug</div>
-                      <div>Items</div>
-                      <div>Actions</div>
+                      <div>ชื่อ</div>
+                      <div>รหัส</div>
+                      <div>รายการเมนู</div>
+                      <div>การกระทำ</div>
                     </div>
                     <div className="divide-y">
                       {categories.map((category) => {
@@ -1112,19 +1111,19 @@ export default function MenuPage() {
                         return (
                           <div key={category.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4">
                             <div className="space-y-1">
-                              <div className="text-sm font-medium sm:hidden">Name</div>
+                              <div className="text-sm font-medium sm:hidden">ชื่อ</div>
                               <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
                             </div>
                             <div className="space-y-1">
-                              <div className="text-sm font-medium sm:hidden">Slug</div>
+                              <div className="text-sm font-medium sm:hidden">รหัส</div>
                               <div className="text-muted-foreground break-all">{category.slug}</div>
                             </div>
                             <div className="space-y-1">
-                              <div className="text-sm font-medium sm:hidden">Items</div>
-                              <div>{itemCount} items</div>
+                              <div className="text-sm font-medium sm:hidden">รายการเมนู</div>
+                              <div>{itemCount} รายการ</div>
                             </div>
                             <div className="space-y-1">
-                              <div className="text-sm font-medium sm:hidden">Actions</div>
+                              <div className="text-sm font-medium sm:hidden">การกระทำ</div>
                               <div className="flex flex-wrap gap-2">
                                 <Button 
                                   variant="ghost" 
@@ -1133,7 +1132,7 @@ export default function MenuPage() {
                                   className="w-full sm:w-auto"
                                 >
                                   <Pencil className="mr-2 h-4 w-4" />
-                                  Edit
+                                  แก้ไข
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -1143,7 +1142,7 @@ export default function MenuPage() {
                                   disabled={itemCount > 0}
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
-                                  Delete
+                                  ลบ
                                 </Button>
                               </div>
                             </div>
@@ -1165,8 +1164,8 @@ export default function MenuPage() {
           {editItem && (
             <form onSubmit={handleEditItem}>
               <DialogHeader>
-                <DialogTitle>Edit Menu Item</DialogTitle>
-                <DialogDescription>Update the details for this food item in multiple languages.</DialogDescription>
+                <DialogTitle>แก้ไขรายการอาหาร</DialogTitle>
+                <DialogDescription>อัปเดตรายละเอียดสำหรับรายการอาหารนี้ในหลายภาษา</DialogDescription>
               </DialogHeader>
               {formError && (
                 <Alert variant="destructive" className="my-4">
@@ -1176,13 +1175,13 @@ export default function MenuPage() {
               <div className="grid gap-4 py-4">
                 <Tabs defaultValue="en" className="w-full">
                   <TabsList className="mb-4">
-                    <TabsTrigger value="en">English</TabsTrigger>
-                    <TabsTrigger value="lo">Lao</TabsTrigger>
-                    <TabsTrigger value="th">Thai</TabsTrigger>
+                    <TabsTrigger value="en">อังกฤษ</TabsTrigger>
+                    <TabsTrigger value="lo">ลาว</TabsTrigger>
+                    <TabsTrigger value="th">ไทย</TabsTrigger>
                   </TabsList>
                   <TabsContent value="en">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-name-en">Name (English) *</Label>
+                      <Label htmlFor="edit-name-en">ชื่อ (อังกฤษ) *</Label>
                       <Input
                         id="edit-name-en"
                         value={editItem.name.en}
@@ -1196,7 +1195,7 @@ export default function MenuPage() {
                       />
                     </div>
                     <div className="grid gap-2 mt-4">
-                      <Label htmlFor="edit-description-en">Description (English) *</Label>
+                      <Label htmlFor="edit-description-en">คำอธิบาย (อังกฤษ) *</Label>
                       <Textarea
                         id="edit-description-en"
                         value={editItem.description.en}
@@ -1212,7 +1211,7 @@ export default function MenuPage() {
                   </TabsContent>
                   <TabsContent value="lo">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-name-lo">Name (Lao)</Label>
+                      <Label htmlFor="edit-name-lo">ชื่อ (ลาว)</Label>
                       <Input
                         id="edit-name-lo"
                         value={editItem.name.lo}
@@ -1225,7 +1224,7 @@ export default function MenuPage() {
                       />
                     </div>
                     <div className="grid gap-2 mt-4">
-                      <Label htmlFor="edit-description-lo">Description (Lao)</Label>
+                      <Label htmlFor="edit-description-lo">คำอธิบาย (ลาว)</Label>
                       <Textarea
                         id="edit-description-lo"
                         value={editItem.description.lo}
@@ -1240,7 +1239,7 @@ export default function MenuPage() {
                   </TabsContent>
                   <TabsContent value="th">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-name-th">Name (Thai)</Label>
+                      <Label htmlFor="edit-name-th">ชื่อ (ไทย)</Label>
                       <Input
                         id="edit-name-th"
                         value={editItem.name.th}
@@ -1253,7 +1252,7 @@ export default function MenuPage() {
                       />
                     </div>
                     <div className="grid gap-2 mt-4">
-                      <Label htmlFor="edit-description-th">Description (Thai)</Label>
+                      <Label htmlFor="edit-description-th">คำอธิบาย (ไทย)</Label>
                       <Textarea
                         id="edit-description-th"
                         value={editItem.description.th}
@@ -1270,7 +1269,7 @@ export default function MenuPage() {
 
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-price">Price ($) *</Label>
+                    <Label htmlFor="edit-price">ราคา ($) *</Label>
                     <Input
                       id="edit-price"
                       type="number"
@@ -1282,7 +1281,7 @@ export default function MenuPage() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="edit-category">Category *</Label>
+                    <Label htmlFor="edit-category">หมวดหมู่ *</Label>
                     <Select
                       value={editItem.category}
                       onValueChange={(value) => setEditItem({ ...editItem, category: value })}
@@ -1308,7 +1307,7 @@ export default function MenuPage() {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-image">Current Image</Label>
+                  <Label htmlFor="edit-image">รูปภาพปัจจุบัน</Label>
                   {editItem.imageUrl && (
                     <div className="mb-2 h-40 w-full overflow-hidden rounded-md">
                       <img
@@ -1318,7 +1317,7 @@ export default function MenuPage() {
                       />
                     </div>
                   )}
-                  <Label htmlFor="edit-image">Upload New Image (Optional)</Label>
+                  <Label htmlFor="edit-image">อัปโหลดรูปภาพใหม่ (ไม่บังคับ)</Label>
                   <Input
                     id="edit-image"
                     type="file"
@@ -1332,10 +1331,10 @@ export default function MenuPage() {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                  Cancel
+                  ยกเลิก
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
                 </Button>
               </DialogFooter>
             </form>
@@ -1349,8 +1348,8 @@ export default function MenuPage() {
           {editCategory && (
             <form onSubmit={handleEditCategory}>
               <DialogHeader>
-                <DialogTitle>Edit Category</DialogTitle>
-                <DialogDescription>Update the details for this category in multiple languages.</DialogDescription>
+                <DialogTitle>แก้ไขหมวดหมู่</DialogTitle>
+                <DialogDescription>อัปเดตรายละเอียดสำหรับหมวดหมู่นี้ในหลายภาษา</DialogDescription>
               </DialogHeader>
               {formError && (
                 <Alert variant="destructive" className="my-4">
@@ -1366,7 +1365,7 @@ export default function MenuPage() {
                   </TabsList>
                   <TabsContent value="en">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-category-name-en">Name (English) *</Label>
+                      <Label htmlFor="edit-category-name-en">ชื่อ (อังกฤษ) *</Label>
                       <Input
                         id="edit-category-name-en"
                         value={editCategory.name.en}
@@ -1382,7 +1381,7 @@ export default function MenuPage() {
                   </TabsContent>
                   <TabsContent value="lo">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-category-name-lo">Name (Lao)</Label>
+                      <Label htmlFor="edit-category-name-lo">ชื่อ (ลาว)</Label>
                       <Input
                         id="edit-category-name-lo"
                         value={editCategory.name.lo}
@@ -1397,7 +1396,7 @@ export default function MenuPage() {
                   </TabsContent>
                   <TabsContent value="th">
                     <div className="grid gap-2">
-                      <Label htmlFor="edit-category-name-th">Name (Thai)</Label>
+                      <Label htmlFor="edit-category-name-th">ชื่อ (ไทย)</Label>
                       <Input
                         id="edit-category-name-th"
                         value={editCategory.name.th}
@@ -1421,16 +1420,16 @@ export default function MenuPage() {
                     required
                   />
                   <p className="text-xs text-muted-foreground">
-                    Warning: Changing the slug will affect all menu items in this category.
+                    คำเตือน: การเปลี่ยน slug จะส่งผลต่อรายการอาหารทั้งหมดในหมวดหมู่นี้
                   </p>
                 </div>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsCategoryEditDialogOpen(false)}>
-                  Cancel
+                  ยกเลิก
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isSubmitting ? "กำลังบันทึก..." : "บันทึกการเปลี่ยนแปลง"}
                 </Button>
               </DialogFooter>
             </form>
@@ -1442,19 +1441,19 @@ export default function MenuPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>คุณแน่ใจหรือไม่?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this menu item from your database.
+              การกระทำนี้ไม่สามารถยกเลิกได้ จะลบรายการอาหารนี้ออกจากฐานข้อมูลของคุณอย่างถาวร
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteItem}
               disabled={isSubmitting}
               className="bg-red-500 hover:bg-red-600"
             >
-              {isSubmitting ? "Deleting..." : "Delete"}
+              {isSubmitting ? "กำลังลบ..." : "ลบ"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1464,24 +1463,24 @@ export default function MenuPage() {
       <AlertDialog open={isCategoryDeleteDialogOpen} onOpenChange={setIsCategoryDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>คุณแน่ใจหรือไม่?</AlertDialogTitle>
             <AlertDialogDescription>
               {categoryToDelete && (
                 <>
-                  This action cannot be undone. This will permanently delete the category "
-                  {categoryToDelete.name[displayLanguage] || categoryToDelete.name.en}" from your database.
+                  การกระทำนี้ไม่สามารถยกเลิกได้ จะลบหมวดหมู่ "
+                  {categoryToDelete.name[displayLanguage] || categoryToDelete.name.en}" ออกจากฐานข้อมูลของคุณอย่างถาวร
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>ยกเลิก</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteCategory}
               disabled={isSubmitting}
               className="bg-red-500 hover:bg-red-600"
             >
-              {isSubmitting ? "Deleting..." : "Delete"}
+              {isSubmitting ? "กำลังลบ..." : "ลบ"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
