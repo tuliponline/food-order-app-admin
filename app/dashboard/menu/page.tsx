@@ -36,7 +36,7 @@ import { initializeApp } from "firebase/app"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } from "firebase/firestore"
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import DashboardNav from "@/components/dashboard-nav"
+import DashboardDrawer from "@/components/dashboard-drawer"
 import { Pencil, Trash2, Plus, Globe, Grid, List, Table } from "lucide-react"
 
 // Your Firebase configuration
@@ -83,6 +83,50 @@ const languages = [
   { code: "lo", name: "Lao" },
   { code: "th", name: "Thai" },
 ]
+
+// Helper function to resize image
+const resizeImage = async (file: File, maxWidth: number = 800, maxHeight: number = 800): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      let width = img.width
+      let height = img.height
+
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+
+      if (height > maxHeight) {
+        width = Math.round((width * maxHeight) / height)
+        height = maxHeight
+      }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'))
+        return
+      }
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Could not create blob'))
+          return
+        }
+        resolve(blob)
+      }, file.type, 0.8) // 0.8 is the quality (0-1)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src)
+      reject(new Error('Failed to load image'))
+    }
+  })
+}
 
 export default function MenuPage() {
   const [activeTab, setActiveTab] = useState("items")
@@ -242,9 +286,10 @@ export default function MenuPage() {
 
       // Upload image if provided
       if (newItem.image) {
-        console.log("Uploading image to Firebase Storage...")
+        console.log("Resizing and uploading image to Firebase Storage...")
+        const resizedImage = await resizeImage(newItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${newItem.image.name}`)
-        const snapshot = await uploadBytes(storageRef, newItem.image)
+        const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
         console.log("Image uploaded successfully:", imageUrl)
       }
@@ -301,9 +346,10 @@ export default function MenuPage() {
 
       // Upload new image if provided
       if (editItem.image) {
-        console.log("Uploading new image to Firebase Storage...")
+        console.log("Resizing and uploading new image to Firebase Storage...")
+        const resizedImage = await resizeImage(editItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${editItem.image.name}`)
-        const snapshot = await uploadBytes(storageRef, editItem.image)
+        const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
         console.log("Image uploaded successfully:", imageUrl)
       }
@@ -533,11 +579,14 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <DashboardNav />
-      <div className="flex-1 p-4 sm:p-6 md:p-8">
-        <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="min-h-screen">
+      <div className="p-4 md:p-8 ml-0">
+        <div className="flex items-center gap-4 mb-4 sm:mb-6">
+          <DashboardDrawer />
           <h1 className="text-2xl sm:text-3xl font-bold">Menu Management</h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Label htmlFor="display-language" className="text-sm sm:text-base">
@@ -818,9 +867,7 @@ export default function MenuPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <Badge variant="outline" className="px-2 py-1 text-xs sm:text-sm">
-                            {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                              categories.find((cat) => cat.slug === item.category)?.name.en ||
-                              item.category}
+                            {item.category}
                           </Badge>
                           <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
                         </div>
@@ -856,9 +903,7 @@ export default function MenuPage() {
                             <div>
                               <CardTitle className="text-lg sm:text-xl">{item.name[displayLanguage] || item.name.en}</CardTitle>
                               <Badge variant="outline" className="mt-2 text-xs sm:text-sm">
-                                {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                                  categories.find((cat) => cat.slug === item.category)?.name.en ||
-                                  item.category}
+                                {item.category}
                               </Badge>
                             </div>
                             <div className="flex space-x-1 sm:space-x-2">
@@ -914,9 +959,7 @@ export default function MenuPage() {
                         </div>
                         <div className="text-xs sm:text-sm font-medium">{item.name[displayLanguage] || item.name.en}</div>
                         <div className="text-xs sm:text-sm">
-                          {categories.find((cat) => cat.slug === item.category)?.name[displayLanguage] ||
-                            categories.find((cat) => cat.slug === item.category)?.name.en ||
-                            item.category}
+                          {item.category}
                         </div>
                         <div className="hidden sm:block text-xs sm:text-sm text-muted-foreground">
                           {item.description[displayLanguage] || item.description.en}
@@ -1051,12 +1094,12 @@ export default function MenuPage() {
             </div>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 {categories.length === 0 ? (
                   <p className="text-center text-muted-foreground">No categories yet. Add your first category!</p>
                 ) : (
                   <div className="rounded-md border">
-                    <div className="grid grid-cols-4 gap-4 p-4 font-medium">
+                    <div className="hidden sm:grid grid-cols-4 gap-4 p-4 font-medium">
                       <div>Name</div>
                       <div>Slug</div>
                       <div>Items</div>
@@ -1067,25 +1110,42 @@ export default function MenuPage() {
                         const itemCount = menuItems.filter((item) => item.category === category.slug).length
 
                         return (
-                          <div key={category.id} className="grid grid-cols-4 gap-4 p-4">
-                            <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
-                            <div className="text-muted-foreground">{category.slug}</div>
-                            <div>{itemCount} items</div>
-                            <div className="flex space-x-2">
-                              <Button variant="ghost" size="sm" onClick={() => openCategoryEditDialog(category)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-500 hover:text-red-600"
-                                onClick={() => openCategoryDeleteDialog(category)}
-                                disabled={itemCount > 0}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </Button>
+                          <div key={category.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Name</div>
+                              <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Slug</div>
+                              <div className="text-muted-foreground break-all">{category.slug}</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Items</div>
+                              <div>{itemCount} items</div>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">Actions</div>
+                              <div className="flex flex-wrap gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => openCategoryEditDialog(category)}
+                                  className="w-full sm:w-auto"
+                                >
+                                  <Pencil className="mr-2 h-4 w-4" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="w-full sm:w-auto text-red-500 hover:text-red-600"
+                                  onClick={() => openCategoryDeleteDialog(category)}
+                                  disabled={itemCount > 0}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         )

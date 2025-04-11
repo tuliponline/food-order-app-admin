@@ -80,83 +80,87 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen">
-      <DashboardDrawer />
-      <div className="p-4 md:p-8 ml-0">
-        <h1 className="mb-6 text-3xl font-bold">Dashboard</h1>
+    <div className="min-h-screen bg-background">
+      <div className="p-2 sm:p-4 md:p-6 lg:p-8 ml-0">
+        <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <DashboardDrawer />
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">Dashboard</h1>
+        </div>
 
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+        <div className="grid gap-2 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.users}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.users}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Menu Items</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.menuItems}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.menuItems}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.orders}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.orders}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
+              <div className="text-xl sm:text-2xl font-bold">{stats.pendingOrders}</div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-4 sm:mt-6 md:mt-8">
           <Tabs defaultValue="recent">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="recent">Recent Orders</TabsTrigger>
               <TabsTrigger value="popular">Popular Items</TabsTrigger>
             </TabsList>
-            <TabsContent value="recent" className="mt-6">
+            <TabsContent value="recent" className="mt-4 sm:mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Recent Orders</CardTitle>
                   <CardDescription>Latest customer orders from your app</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {stats.orders === 0 ? (
                     <p className="text-muted-foreground">No orders yet</p>
                   ) : (
-                    <div className="rounded-md border">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-4 font-medium">
-                        <div>Order ID</div>
-                        <div>Customer</div>
-                        <div className="hidden sm:block">Items</div>
-                        <div className="hidden md:block">Total</div>
-                        <div className="hidden md:block">Status</div>
-                      </div>
-                      <div className="divide-y">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 p-4">
-                          <div className="text-sm">#ORD-001</div>
-                          <div className="text-sm">John Doe</div>
-                          <div className="text-sm hidden sm:block">3 items</div>
-                          <div className="text-sm hidden md:block">$24.99</div>
-                          <div className="text-sm hidden md:block">
-                            <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
-                              Pending
-                            </span>
+                    <div className="rounded-md border overflow-x-auto">
+                      <div className="min-w-[600px]">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 p-2 sm:p-4 font-medium">
+                          <div>Order ID</div>
+                          <div>Customer</div>
+                          <div className="hidden sm:block">Items</div>
+                          <div className="hidden md:block">Total</div>
+                          <div className="hidden md:block">Status</div>
+                        </div>
+                        <div className="divide-y">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-4 p-2 sm:p-4">
+                            <div className="text-sm truncate">#ORD-001</div>
+                            <div className="text-sm truncate">John Doe</div>
+                            <div className="text-sm hidden sm:block truncate">3 items</div>
+                            <div className="text-sm hidden md:block truncate">$24.99</div>
+                            <div className="text-sm hidden md:block">
+                              <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
+                                Pending
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -165,29 +169,31 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="popular" className="mt-6">
+            <TabsContent value="popular" className="mt-4 sm:mt-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Popular Items</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl">Popular Items</CardTitle>
                   <CardDescription>Most ordered food items</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {stats.menuItems === 0 ? (
                     <p className="text-muted-foreground">No menu items yet</p>
                   ) : (
-                    <div className="rounded-md border">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4 font-medium">
-                        <div>Item</div>
-                        <div className="hidden sm:block">Category</div>
-                        <div className="hidden md:block">Price</div>
-                        <div>Orders</div>
-                      </div>
-                      <div className="divide-y">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-                          <div className="text-sm">Margherita Pizza</div>
-                          <div className="text-sm hidden sm:block">Pizza</div>
-                          <div className="text-sm hidden md:block">$12.99</div>
-                          <div className="text-sm">42</div>
+                    <div className="rounded-md border overflow-x-auto">
+                      <div className="min-w-[500px]">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 p-2 sm:p-4 font-medium">
+                          <div>Item</div>
+                          <div className="hidden sm:block">Category</div>
+                          <div className="hidden md:block">Price</div>
+                          <div>Orders</div>
+                        </div>
+                        <div className="divide-y">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4 p-2 sm:p-4">
+                            <div className="text-sm truncate">Margherita Pizza</div>
+                            <div className="text-sm hidden sm:block truncate">Pizza</div>
+                            <div className="text-sm hidden md:block truncate">$12.99</div>
+                            <div className="text-sm truncate">42</div>
+                          </div>
                         </div>
                       </div>
                     </div>
