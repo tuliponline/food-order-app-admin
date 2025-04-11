@@ -38,6 +38,7 @@ import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc } 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import DashboardDrawer from "@/components/dashboard-drawer"
 import { Pencil, Trash2, Plus, Globe, Grid, List, Table } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -69,6 +70,7 @@ type MenuItem = {
   price: number
   category: string
   imageUrl: string
+  status: "enabled" | "disabled"
 }
 
 type Category = {
@@ -145,6 +147,7 @@ export default function MenuPage() {
     price: "",
     category: "",
     image: null as File | null,
+    status: "enabled" as "enabled" | "disabled"
   })
   const [editItem, setEditItem] = useState<{
     id: string
@@ -154,6 +157,7 @@ export default function MenuPage() {
     category: string
     imageUrl: string
     image: File | null
+    status: "enabled" | "disabled"
   } | null>(null)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -227,6 +231,7 @@ export default function MenuPage() {
           price: data.price,
           category: data.category,
           imageUrl: data.imageUrl,
+          status: data.status || "enabled"
         })
       })
 
@@ -302,6 +307,7 @@ export default function MenuPage() {
         price: Number.parseFloat(newItem.price),
         category: newItem.category,
         imageUrl: imageUrl,
+        status: newItem.status
       })
 
       console.log("เพิ่มเอกสารด้วย ID:", docRef.id)
@@ -313,6 +319,7 @@ export default function MenuPage() {
         price: "",
         category: "",
         image: null,
+        status: "enabled"
       })
       setIsAddDialogOpen(false)
 
@@ -362,6 +369,7 @@ export default function MenuPage() {
         price: Number.parseFloat(editItem.price),
         category: editItem.category,
         imageUrl: imageUrl,
+        status: editItem.status
       })
 
       console.log("เอกสารอัพเดตสำเร็จ")
@@ -410,6 +418,7 @@ export default function MenuPage() {
       category: item.category,
       imageUrl: item.imageUrl,
       image: null,
+      status: item.status
     })
     setIsEditDialogOpen(true)
   }
@@ -572,6 +581,19 @@ export default function MenuPage() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
+  }
+
+  const handleToggleStatus = async (item: MenuItem) => {
+    try {
+      const newStatus = item.status === "enabled" ? "disabled" : "enabled"
+      await updateDoc(doc(db, "menuItems", item.id), {
+        status: newStatus
+      })
+      fetchMenuItems()
+    } catch (err) {
+      console.error("ผิดพลาดในการเปลี่ยนสถานะ:", err)
+      setError("การเปลี่ยนสถานะล้มเหลว กรุณาลองใหม่อีกครั้ง")
+    }
   }
 
   if (loading) {
@@ -807,6 +829,21 @@ export default function MenuPage() {
                         </div>
                       </div>
                       <div className="grid gap-2">
+                        <Label htmlFor="status">สถานะ</Label>
+                        <Select
+                          value={newItem.status}
+                          onValueChange={(value: "enabled" | "disabled") => setNewItem({ ...newItem, status: value })}
+                        >
+                          <SelectTrigger id="status">
+                            <SelectValue placeholder="เลือกสถานะ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="enabled">Enabled</SelectItem>
+                            <SelectItem value="disabled">Disabled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
                         <Label htmlFor="image">รูปภาพ</Label>
                         <Input
                           id="image"
@@ -840,7 +877,7 @@ export default function MenuPage() {
                   </p>
                 ) : (
                   menuItems.map((item) => (
-                    <Card key={item.id}>
+                    <Card key={item.id} className={item.status === "disabled" ? "opacity-50" : ""}>
                       <div className="aspect-video w-full overflow-hidden">
                         <img
                           src={item.imageUrl || "/placeholder.svg?height=200&width=400"}
@@ -869,7 +906,19 @@ export default function MenuPage() {
                           <Badge variant="outline" className="px-2 py-1 text-xs sm:text-sm">
                             {item.category}
                           </Badge>
-                          <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={item.status === "enabled"}
+                                onCheckedChange={() => handleToggleStatus(item)}
+                                className="data-[state=checked]:bg-green-500"
+                              />
+                              <span className="text-xs sm:text-sm">
+                                {item.status === "enabled" ? "Enabled" : "Disabled"}
+                              </span>
+                            </div>
+                            <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
+                          </div>
                         </div>
                       </CardHeader>
                       <CardContent className="p-3 sm:p-4 pt-0">
@@ -889,7 +938,7 @@ export default function MenuPage() {
                   <p className="text-center text-muted-foreground">No menu items yet. Add your first item!</p>
                 ) : (
                   menuItems.map((item) => (
-                    <Card key={item.id}>
+                    <Card key={item.id} className={item.status === "disabled" ? "opacity-50" : ""}>
                       <div className="flex flex-col sm:flex-row">
                         <div className="w-full sm:w-48 h-48 sm:h-auto">
                           <img
@@ -902,9 +951,21 @@ export default function MenuPage() {
                           <div className="flex items-start justify-between">
                             <div>
                               <CardTitle className="text-lg sm:text-xl">{item.name[displayLanguage] || item.name.en}</CardTitle>
-                              <Badge variant="outline" className="mt-2 text-xs sm:text-sm">
-                                {item.category}
-                              </Badge>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge variant="outline" className="text-xs sm:text-sm">
+                                  {item.category}
+                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <Switch
+                                    checked={item.status === "enabled"}
+                                    onCheckedChange={() => handleToggleStatus(item)}
+                                    className="data-[state=checked]:bg-green-500"
+                                  />
+                                  <span className="text-xs sm:text-sm">
+                                    {item.status === "enabled" ? "Enabled" : "Disabled"}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                             <div className="flex space-x-1 sm:space-x-2">
                               <Button variant="ghost" size="icon" className="h-7 w-7 sm:h-8 sm:w-8" onClick={() => openEditDialog(item)}>
@@ -936,11 +997,12 @@ export default function MenuPage() {
 
             {viewMode === "table" && (
               <div className="rounded-md border overflow-x-auto">
-                <div className="grid grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4 font-medium text-xs sm:text-sm">
+                <div className="grid grid-cols-7 gap-2 sm:gap-4 p-2 sm:p-4 font-medium text-xs sm:text-sm">
                   <div className="w-16 sm:w-24">รูปภาพ</div>
                   <div>ชื่อ</div>
                   <div>หมวดหมู่</div>
                   <div className="hidden sm:block">คำอธิบาย</div>
+                  <div>สถานะ</div>
                   <div>ราคา</div>
                   <div>การกระทำ</div>
                 </div>
@@ -949,7 +1011,7 @@ export default function MenuPage() {
                     <div className="p-4 text-center text-muted-foreground">ไม่มีรายการเมนูอะไรเลย เพิ่มรายการเมนูของคุณก่อน!</div>
                   ) : (
                     menuItems.map((item) => (
-                      <div key={item.id} className="grid grid-cols-6 gap-2 sm:gap-4 p-2 sm:p-4">
+                      <div key={item.id} className="grid grid-cols-7 gap-2 sm:gap-4 p-2 sm:p-4">
                         <div className="w-16 sm:w-24 h-16 sm:h-24 overflow-hidden rounded-md">
                           <img
                             src={item.imageUrl || "/placeholder.svg?height=200&width=400"}
@@ -963,6 +1025,16 @@ export default function MenuPage() {
                         </div>
                         <div className="hidden sm:block text-xs sm:text-sm text-muted-foreground">
                           {item.description[displayLanguage] || item.description.en}
+                        </div>
+                        <div className="text-xs sm:text-sm">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={item.status === "enabled"}
+                              onCheckedChange={() => handleToggleStatus(item)}
+                              className="data-[state=checked]:bg-green-500"
+                            />
+                            <span>{item.status === "enabled" ? "Enabled" : "Disabled"}</span>
+                          </div>
                         </div>
                         <div className="text-xs sm:text-sm font-medium">${item.price.toFixed(2)}</div>
                         <div className="flex items-center space-x-1 sm:space-x-2">
@@ -1305,6 +1377,21 @@ export default function MenuPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-status">สถานะ</Label>
+                  <Select
+                    value={editItem.status}
+                    onValueChange={(value: "enabled" | "disabled") => setEditItem({ ...editItem, status: value })}
+                  >
+                    <SelectTrigger id="edit-status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="enabled">Enabled</SelectItem>
+                      <SelectItem value="disabled">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="edit-image">รูปภาพปัจจุบัน</Label>
