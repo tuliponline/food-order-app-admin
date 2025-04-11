@@ -838,8 +838,8 @@ export default function MenuPage() {
                             <SelectValue placeholder="เลือกสถานะ" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="enabled">Enabled</SelectItem>
-                            <SelectItem value="disabled">Disabled</SelectItem>
+                            <SelectItem value="enabled">เปิด</SelectItem>
+                            <SelectItem value="disabled">ปิด</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
