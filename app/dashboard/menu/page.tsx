@@ -932,7 +932,7 @@ export default function MenuPage() {
                                 {item.status === "enabled" ? "Enabled" : "Disabled"}
                               </span>
                             </div>
-                            <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
+                            <span className="font-bold text-sm sm:text-base">{item.price.toFixed(0)}</span>
                           </div>
                         </div>
                       </CardHeader>
@@ -1000,7 +1000,7 @@ export default function MenuPage() {
                             {item.description[displayLanguage] || item.description.en}
                           </p>
                           <div className="mt-4 flex items-center justify-between">
-                            <span className="font-bold text-sm sm:text-base">${item.price.toFixed(2)}</span>
+                            <span className="font-bold text-sm sm:text-base">{item.price.toFixed(0)}</span>
                           </div>
                         </div>
                       </div>
@@ -1051,7 +1051,7 @@ export default function MenuPage() {
                             <span>{item.status === "enabled" ? "Enabled" : "Disabled"}</span>
                           </div>
                         </div>
-                        <div className="text-xs sm:text-sm font-medium">${item.price.toFixed(2)}</div>
+                        <div className="text-xs sm:text-sm font-medium">{item.price.toFixed(0)}</div>
                         <div className="flex items-center space-x-1 sm:space-x-2">
                           <Button variant="ghost" size="sm" onClick={() => openEditDialog(item)} className="h-7 sm:h-9">
                             <Pencil className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
