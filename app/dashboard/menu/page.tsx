@@ -675,9 +675,9 @@ export default function MenuPage() {
                     <div className="grid gap-4 py-4">
                       <Tabs defaultValue="en" className="w-full">
                         <TabsList className="mb-4">
-                            <TabsTrigger value="en"></TabsTrigger>
-                          <TabsTrigger value="lo">Lao</TabsTrigger>
-                          <TabsTrigger value="th">Thai</TabsTrigger>
+                            <TabsTrigger value="en">อังกฤษ</TabsTrigger>
+                          <TabsTrigger value="lo">ลาว</TabsTrigger>
+                          <TabsTrigger value="th">ไทย</TabsTrigger>
                         </TabsList>
                         <TabsContent value="en">
                           <div className="grid gap-2">
@@ -798,7 +798,7 @@ export default function MenuPage() {
                               ) : (
                                 categories.map((category) => (
                                   <SelectItem key={category.id} value={category.slug}>
-                                    {category.name[displayLanguage] || category.name.en}
+                                    {category.name.th}
                                   </SelectItem>
                                 ))
                               )}
