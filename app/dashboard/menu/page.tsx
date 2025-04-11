@@ -77,6 +77,7 @@ type Category = {
   id: string
   name: LanguageContent
   slug: string
+  sequence: number
 }
 
 // Available languages
@@ -168,11 +169,13 @@ export default function MenuPage() {
   const [newCategory, setNewCategory] = useState({
     name: { en: "", lo: "", th: "" },
     slug: "",
+    sequence: 0
   })
   const [editCategory, setEditCategory] = useState<{
     id: string
     name: LanguageContent
     slug: string
+    sequence: number
   } | null>(null)
   const [isCategoryAddDialogOpen, setIsCategoryAddDialogOpen] = useState(false)
   const [isCategoryEditDialogOpen, setIsCategoryEditDialogOpen] = useState(false)
@@ -260,8 +263,12 @@ export default function MenuPage() {
           id: doc.id,
           name,
           slug: data.slug,
+          sequence: data.sequence || 0
         })
       })
+
+      // Sort categories by sequence number
+      fetchedCategories.sort((a, b) => a.sequence - b.sequence)
 
       console.log(`ดึงข้อมูล ${fetchedCategories.length} หมวดหมู่`)
       setCategories(fetchedCategories)
@@ -450,12 +457,18 @@ export default function MenuPage() {
         return
       }
 
+      // Get the next sequence number
+      const nextSequence = categories.length > 0 
+        ? Math.max(...categories.map(c => c.sequence)) + 1 
+        : 1
+
       console.log("เพิ่มหมวดหมู่ใหม่:", newCategory)
 
       // Add document to Firestore
       const docRef = await addDoc(collection(db, "categories"), {
         name: newCategory.name,
         slug: newCategory.slug,
+        sequence: nextSequence
       })
 
       console.log("เพิ่มหมวดหมู่ด้วย ID:", docRef.id)
@@ -464,6 +477,7 @@ export default function MenuPage() {
       setNewCategory({
         name: { en: "", lo: "", th: "" },
         slug: "",
+        sequence: 0
       })
       setIsCategoryAddDialogOpen(false)
 
@@ -566,6 +580,7 @@ export default function MenuPage() {
       id: category.id,
       name: category.name,
       slug: category.slug,
+      sequence: category.sequence
     })
     setIsCategoryEditDialogOpen(true)
   }
@@ -791,7 +806,7 @@ export default function MenuPage() {
 
                       <div className="grid grid-cols-2 gap-4 mt-4">
                         <div className="grid gap-2">
-                          <Label htmlFor="price">ราคา ($) *</Label>
+                          <Label htmlFor="price">ราคา (กีบ) *</Label>
                           <Input
                             id="price"
                             type="number"
@@ -1170,7 +1185,8 @@ export default function MenuPage() {
                   <p className="text-center text-muted-foreground">ไม่มีหมวดหมู่อะไรเลย เพิ่มหมวดหมู่ของคุณก่อน!</p>
                 ) : (
                   <div className="rounded-md border">
-                    <div className="hidden sm:grid grid-cols-4 gap-4 p-4 font-medium">
+                    <div className="hidden sm:grid grid-cols-5 gap-4 p-4 font-medium">
+                      <div>ลำดับ</div>
                       <div>ชื่อ</div>
                       <div>รหัส</div>
                       <div>รายการเมนู</div>
@@ -1181,7 +1197,11 @@ export default function MenuPage() {
                         const itemCount = menuItems.filter((item) => item.category === category.slug).length
 
                         return (
-                          <div key={category.id} className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4">
+                          <div key={category.id} className="grid grid-cols-1 sm:grid-cols-5 gap-4 p-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium sm:hidden">ลำดับ</div>
+                              <div className="font-medium">{category.sequence}</div>
+                            </div>
                             <div className="space-y-1">
                               <div className="text-sm font-medium sm:hidden">ชื่อ</div>
                               <div className="font-medium">{category.name[displayLanguage] || category.name.en}</div>
