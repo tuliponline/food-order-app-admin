@@ -84,6 +84,50 @@ const languages = [
   { code: "th", name: "Thai" },
 ]
 
+// Helper function to resize image
+const resizeImage = async (file: File, maxWidth: number = 800, maxHeight: number = 800): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      let width = img.width
+      let height = img.height
+
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+
+      if (height > maxHeight) {
+        width = Math.round((width * maxHeight) / height)
+        height = maxHeight
+      }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'))
+        return
+      }
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Could not create blob'))
+          return
+        }
+        resolve(blob)
+      }, file.type, 0.8) // 0.8 is the quality (0-1)
+    }
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src)
+      reject(new Error('Failed to load image'))
+    }
+  })
+}
+
 export default function MenuPage() {
   const [activeTab, setActiveTab] = useState("items")
   const [viewMode, setViewMode] = useState<"grid" | "list" | "table">("grid")
@@ -242,9 +286,10 @@ export default function MenuPage() {
 
       // Upload image if provided
       if (newItem.image) {
-        console.log("Uploading image to Firebase Storage...")
+        console.log("Resizing and uploading image to Firebase Storage...")
+        const resizedImage = await resizeImage(newItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${newItem.image.name}`)
-        const snapshot = await uploadBytes(storageRef, newItem.image)
+        const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
         console.log("Image uploaded successfully:", imageUrl)
       }
@@ -301,9 +346,10 @@ export default function MenuPage() {
 
       // Upload new image if provided
       if (editItem.image) {
-        console.log("Uploading new image to Firebase Storage...")
+        console.log("Resizing and uploading new image to Firebase Storage...")
+        const resizedImage = await resizeImage(editItem.image)
         const storageRef = ref(storage, `menuItems/${Date.now()}_${editItem.image.name}`)
-        const snapshot = await uploadBytes(storageRef, editItem.image)
+        const snapshot = await uploadBytes(storageRef, resizedImage)
         imageUrl = await getDownloadURL(snapshot.ref)
         console.log("Image uploaded successfully:", imageUrl)
       }
